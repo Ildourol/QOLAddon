@@ -98,6 +98,20 @@ function W.ParseSystem(msg)
         notify(); return true
     end
 
+    -- Packed away (undo / remove success)
+    if msg:find("packed away", 1, true) then
+        if W.count and W.count > 0 then W.count = W.count - 1 end
+        notify(); return true
+    end
+
+    -- Privacy update
+    local newPriv = msg:match("Camp privacy updated to: (.-)%(")
+    if not newPriv then newPriv = msg:match("Camp privacy updated to: (.-)$") end
+    if newPriv then
+        W.privacy = QOL.Trim(newPriv)
+        notify(); return true
+    end
+
     -- Claim success: "This ground is yours. Your Warband Camp is founded ..."
     if msg:find("This ground is yours", 1, true) then
         W.enabled, W.hasCamp = true, true

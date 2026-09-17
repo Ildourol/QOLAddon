@@ -164,6 +164,42 @@ local function createMainFrame()
         QOL.cats.player.color .. QOL.cats.player.name .. QOL.colors.reset .. "   " ..
         QOL.cats.bot.color    .. QOL.cats.bot.name    .. QOL.colors.reset)
 
+    -- Manual command bar (run any dot-command or bot-order directly)
+    local runBtn = QOL.MakeFlatButton(footer, 50, FOOTER_H - 2, "Send", { justify = "CENTER" })
+    runBtn:SetPoint("RIGHT", footer, "RIGHT", -2, 0)
+
+    local cmdBox = QOL.MakeFlatEditBox(footer, 420, FOOTER_H - 2, "Manual command (.camp, .playerbots, $order...)")
+    cmdBox:SetPoint("RIGHT", runBtn, "LEFT", -6, 0)
+
+    local function runManualCommand()
+        local text = QOL.Trim(cmdBox:GetText() or "")
+        if text == "" then return end
+        if text:sub(1, 1) == "$" then
+            QOL.RunBotOrder(text:sub(2))
+        else
+            QOL.RunCommand(text)
+        end
+        cmdBox:SetText("")
+        if cmdBox.refreshHint then cmdBox.refreshHint() end
+    end
+
+    cmdBox:SetScript("OnEnterPressed", function(self)
+        self:ClearFocus()
+        runManualCommand()
+    end)
+    cmdBox:SetScript("OnEscapePressed", function(self)
+        self:ClearFocus()
+    end)
+    cmdBox:SetScript("OnEnter", function(self)
+        GameTooltip:SetOwner(self, "ANCHOR_TOP")
+        GameTooltip:SetText("Manual Command Bar", 1, 0.82, 0.30)
+        GameTooltip:AddLine("Type any server command (e.g. .camp ..., .clear ...) or bot order ($...) directly from QOLAddon.", 1, 1, 1, true)
+        GameTooltip:AddLine("Press Enter or click Send to execute.", 0.6, 0.8, 1, true)
+        GameTooltip:Show()
+    end)
+    cmdBox:SetScript("OnLeave", function() GameTooltip:Hide() end)
+    runBtn:SetScript("OnClick", runManualCommand)
+
     f.tabRail = buildRail(f)
     f:Hide()
     return f
